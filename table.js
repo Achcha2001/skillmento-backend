@@ -50,7 +50,43 @@ const createEmployersTableQuery = `
     employerPreferredSubject TEXT NOT NULL,
     password TEXT NOT NULL
   )
+`
+const createPostJobTableQuery = `
+  CREATE TABLE IF NOT EXISTS postJobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company TEXT NOT NULL,
+    jobCategory TEXT NOT NULL,
+    jobPosition TEXT NOT NULL,
+    duration TEXT NOT NULL,
+    qualifications TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`
+const createMockInterviewsTableQuery = `
+  CREATE TABLE IF NOT EXISTS mockInterviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+  
+    date DATE,
+    time TIME,
+    jobPosition TEXT
+  )
+  `
+  const createBiddingTableQuery = `
+  CREATE TABLE IF NOT EXISTS bidding (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bidAmount INTEGER NOT NULL,
+    maximumDuration INTEGER NOT NULL,
+    contactNumber TEXT NOT NULL,
+    jobId INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobId) REFERENCES postJobs(id)
+  )
 `;
+
+;
+
+
+
 
 module.exports = {
   dbPromise,
@@ -58,4 +94,7 @@ module.exports = {
   createInternsTableQuery,
   createFreelancersTableQuery,
   createEmployersTableQuery,
+  createPostJobTableQuery,
+  createMockInterviewsTableQuery,
+  createBiddingTableQuery,
 };

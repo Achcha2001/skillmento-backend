@@ -8,6 +8,9 @@ const {
   createInternsTableQuery,
   createFreelancersTableQuery,
   createEmployersTableQuery,
+  createMockInterviewsTableQuery,
+  createPostJobTableQuery,
+  createBiddingTableQuery,
 } = require('./table');
 const app = express();
 
@@ -55,6 +58,33 @@ app.use(async (req, res, next) => {
       console.log('Employers table created successfully');
     }
   });
+
+  await db.run(createMockInterviewsTableQuery, (err) => {
+    if (err) {
+      console.error('Error creating mockInterviews table:', err);
+    } else {
+      console.log('MockInterviews table created successfully');
+    }
+  });
+  await db.run(createPostJobTableQuery, (err) => {
+    if (err) {
+      console.error('Error creating postjob table:', err);
+    } else {
+      console.log('Postjob table created successfully');
+    }
+  });
+
+  await db.run(createBiddingTableQuery, (err) => {
+    if (err) {
+      console.error('Error creating bidding table:', err);
+    } else {
+      console.log('bidding table created successfully');
+    }
+  });
+  
+  
+
+
 })();
 
 // Intern registration route
@@ -135,24 +165,160 @@ app.post('/employers', async (req, res) => {
 
 // Login route for all user types
 app.post('/login', async (req, res) => {
-  const { email, password, userType } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await req.db.get(`SELECT * FROM ${userType}s WHERE email = ? AND password = ?`, [email, password]);
+    // Check if the credentials match an intern
+    const intern = await req.db.get('SELECT * FROM interns WHERE email = ? AND password = ?', [email, password]);
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (intern) {
+      // Create a JWT token for authentication
+      const token = jwt.sign({ userId: intern.id, userType: 'intern' }, 'your-secret-key', { expiresIn: '1h' });
+      return res.json({ message: 'Login successful', token, userType: 'intern' });
     }
 
-    // Create a JWT token for authentication
-    const token = jwt.sign({ userId: user.id, userType }, 'your-secret-key', { expiresIn: '1h' });
+    // If not an intern, check if the credentials match an employer
+    const employer = await req.db.get('SELECT * FROM employers WHERE email = ? AND password = ?', [email, password]);
 
-    res.json({ message: 'Login successful', token });
+    if (employer) {
+      // Create a JWT token for authentication
+      const token = jwt.sign({ userId: employer.id, userType: 'employer' }, 'your-secret-key', { expiresIn: '1h' });
+      return res.json({ message: 'Login successful', token, userType: 'employer' });
+    }
+
+    // If no match, return Invalid credentials
+    res.status(401).json({ message: 'Invalid credentials' });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Failed to login' });
   }
 });
+// Post a Job route
+app.post('/postJob', async (req, res) => {
+  const { companyName, jobCategory, jobPosition, duration, qualifications } = req.body;
+
+  try {
+    const result = await req.db.run(
+      'INSERT INTO postJobs (company, jobCategory, jobPosition, duration, qualifications) VALUES (?, ?, ?, ?, ?)',
+      [companyName, jobCategory, jobPosition, duration, qualifications]
+    );
+
+    if (result && result.lastID) {
+      console.log('Job posted successfully');
+      res.status(201).json({ message: 'Job posted successfully', insertId: result.lastID });
+    } else {
+      console.error('Failed to post job. No result or lastID:', result);
+      res.status(500).json({ message: 'Failed to post job' });
+    }
+  } catch (error) {
+    console.error('Error during job posting:', error);
+    res.status(500).json({ message: 'Failed to post job' });
+  }
+});
+
+
+// Mock interview booking route
+app.post('/bookMockInterview', async (req, res) => {
+  try {
+    const {  date, time, jobPosition } = req.body;
+
+    // Validate input data 
+    if (  !date || !time || !jobPosition) {
+      return res.status(400).json({ message: 'Invalid input data' });
+    }
+
+    // Insert the mock interview details into the database
+    const db = await req.db;
+    const insertQuery = `
+      INSERT INTO mockInterviews ( date, time, jobPosition)
+      VALUES ( ?, ?, ?)
+    `;
+    await db.run(insertQuery, [ date, time, jobPosition]);
+
+    return res.status(200).json({ message: 'Mock interview booked successfully' });
+  } catch (error) {
+    console.error('Error booking mock interview:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/fetchPostedJobs', async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const postedJobs = await db.all('SELECT * FROM postJobs ORDER BY created_at DESC');
+    
+    console.log('postedJobs:', postedJobs); // Log the postedJobs array
+    
+    res.json(postedJobs);
+  } catch (error) {
+    console.error('Error fetching posted jobs:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// DELETE route for deleting a job
+app.delete('/deleteJob/:jobId', async (req, res) => {
+  const jobId = req.params.jobId;
+
+  try {
+    const db = await dbPromise;
+    const result = await db.run('DELETE FROM postJobs WHERE id = ?', [jobId]);
+
+    if (result.changes > 0) {
+      console.log('Job deleted successfully');
+      res.json({ message: 'Job deleted successfully' });
+    } else {
+      console.error('Job not found or failed to delete');
+      res.status(404).json({ error: 'Job not found or failed to delete' });
+    }
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+// Route to submit a job bid
+app.post('/submitJobBid', async (req, res) => {
+  const {  jobId, bidAmount, maximumDuration, contactNumber } = req.body;
+
+  try {
+    const db = await dbPromise;
+    const insertBidQuery = `
+      INSERT INTO bidding ( jobId, bidAmount, maximumDuration, contactNumber)
+      VALUES ( ?, ?, ?, ?)
+    `;
+
+    await db.run(insertBidQuery, [ jobId, bidAmount, maximumDuration, contactNumber]);
+
+    res.status(200).json({ message: 'Job bid submitted successfully!' });
+  } catch (error) {
+    console.error('Error during job bidding:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Route to fetch job bids for a specific job
+app.get('/fetchJobBids/:jobId', async (req, res) => {
+  const { jobId } = req.params;
+
+  try {
+    const db = await dbPromise;
+    const fetchBidsQuery = `
+      SELECT * FROM bidding WHERE jobId = ?
+    `;
+
+    const bids = await db.all(fetchBidsQuery, [jobId]);
+
+    res.status(200).json(bids);
+  } catch (error) {
+    console.error('Error fetching job bids:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 
 const PORT = 8080;
 
