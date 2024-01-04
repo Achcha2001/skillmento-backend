@@ -317,6 +317,29 @@ app.get('/fetchJobBids/:jobId', async (req, res) => {
   }
 });
 
+// Route to get the logged-in user's name
+app.get('/getLoggedInUserName', (req, res) => {
+  if (req.loggedInUser) {
+    const userId = req.loggedInUser.userId;
+    
+    // Fetch the user name from the database based on the user type
+    // (You need to implement this part based on your database structure)
+    // Example for interns:
+    req.db.get('SELECT firstName, lastName FROM interns WHERE id = ?', [userId], (err, user) => {
+      if (err) {
+        console.error('Error fetching user name:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+      } else if (user) {
+        const fullName = `${user.firstName} ${user.lastName}`;
+        res.json({ userName: fullName });
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    });
+  } else {
+    res.status(401).json({ message: 'Not logged in' });
+  }
+});
 
 
 
