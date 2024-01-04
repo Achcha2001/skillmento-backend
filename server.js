@@ -317,7 +317,7 @@ app.get('/fetchJobBids/:jobId', async (req, res) => {
   }
 });
 
-// Route to get the logged-in user's name
+
 app.get('/getLoggedInUserName', (req, res) => {
   if (req.loggedInUser) {
     const userId = req.loggedInUser.userId;
@@ -337,6 +337,8 @@ app.get('/getLoggedInUserName', (req, res) => {
       }
     });
   } else {
+    // If there's no token, you can still respond with a default value or an error message.
+    // Adjust this part based on your application's requirements.
     res.status(401).json({ message: 'Not logged in' });
   }
 });
