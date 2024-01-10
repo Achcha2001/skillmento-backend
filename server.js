@@ -322,9 +322,7 @@ app.get('/getLoggedInUserName', (req, res) => {
   if (req.loggedInUser) {
     const userId = req.loggedInUser.userId;
     
-    // Fetch the user name from the database based on the user type
-    // (You need to implement this part based on your database structure)
-    // Example for interns:
+   
     req.db.get('SELECT firstName, lastName FROM interns WHERE id = ?', [userId], (err, user) => {
       if (err) {
         console.error('Error fetching user name:', err);
@@ -343,12 +341,12 @@ app.get('/getLoggedInUserName', (req, res) => {
   }
 });
 
-// Add this route to handle contact form submissions
-app.post('/contact-us', async (req, res) => {
+
+app.post('/contactus', async (req, res) => {
   const { email, message } = req.body;
 
   try {
-    // Insert contact form data into the "contacts" table
+    
     const result = await req.db.run(
       'INSERT INTO contacts (email, message) VALUES (?, ?)',
       [email, message]
