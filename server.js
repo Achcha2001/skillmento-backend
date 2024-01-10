@@ -343,6 +343,31 @@ app.get('/getLoggedInUserName', (req, res) => {
   }
 });
 
+// Add this route to handle contact form submissions
+app.post('/contact-us', async (req, res) => {
+  const { email, message } = req.body;
+
+  try {
+    // Insert contact form data into the "contacts" table
+    const result = await req.db.run(
+      'INSERT INTO contacts (email, message) VALUES (?, ?)',
+      [email, message]
+    );
+
+    if (result && result.lastID) {
+      console.log('Contact form submitted successfully');
+      res.status(201).json({ message: 'Contact form submitted successfully', insertId: result.lastID });
+    } else {
+      console.error('Failed to submit contact form');
+      res.status(500).json({ message: 'Failed to submit contact form' });
+    }
+  } catch (error) {
+    console.error('Error during contact form submission:', error);
+    console.error(error.message);
+    res.status(500).json({ message: 'Failed to submit contact form' });
+  }
+});
+
 
 
 const PORT = 8080;
