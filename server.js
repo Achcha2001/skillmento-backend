@@ -354,7 +354,7 @@ app.post('/contactus', async (req, res) => {
 
     if (result && result.lastID) {
       console.log('Contact form submitted successfully');
-      res.status(201).json({ message: 'Contact form submitted successfully', insertId: result.lastID });
+      res.status(201).json({ message: 'Contact form submitted successfully'});
     } else {
       console.error('Failed to submit contact form');
       res.status(500).json({ message: 'Failed to submit contact form' });
