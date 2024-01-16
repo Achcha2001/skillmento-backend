@@ -366,6 +366,64 @@ app.post('/contactus', async (req, res) => {
   }
 });
 
+// Add this route to fetch contact messages
+app.get('/fetchContacts', async (req, res) => {
+  try {
+    const db = await req.db;
+    const contacts = await db.all('SELECT * FROM contacts ORDER BY created_at DESC');
+    
+    console.log('Contact messages:', contacts); 
+    
+    res.json(contacts);
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+// Fetch registered employers route
+app.get('/fetchEmployers', async (req, res) => {
+  try {
+    const db = await req.db;
+    const employers = await db.all('SELECT * FROM employers');
+    
+    console.log('Registered Employers:', employers); 
+    
+    res.json(employers);
+  } catch (error) {
+    console.error('Error fetching registered employers:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+// Fetch registered interns route
+app.get('/fetchInterns', async (req, res) => {
+  try {
+    const db = await req.db;
+    const interns = await db.all('SELECT * FROM interns');
+    
+    console.log('Registered Interns:', interns); 
+    
+    res.json(interns);
+  } catch (error) {
+    console.error('Error fetching registered interns:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/fetchMockInterviews', async (req, res) => {
+  try {
+    // Fetch mock interview details from the database
+    const db = await req.db;
+    const fetchQuery = 'SELECT * FROM mockInterviews';
+    const mockInterviews = await db.all(fetchQuery);
+
+    return res.status(200).json(mockInterviews);
+  } catch (error) {
+    console.error('Error fetching mock interviews:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 
 const PORT = 8080;
