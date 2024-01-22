@@ -422,6 +422,24 @@ app.get('/fetchMockInterviews', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+// Update bid status to 'Accepted'
+app.put('/acceptBid/:id', (req, res) => {
+  const bidId = req.params.id;
+  // Perform database update or any other necessary logic
+  // Set the status to 'Accepted' in your database
+
+  res.json({ status: 'Accepted' });
+});
+
+// Update bid status to 'Declined'
+app.put('/declineBid/:id', (req, res) => {
+  const bidId = req.params.id;
+  // Perform database update or any other necessary logic
+  // Set the status to 'Declined' in your database
+
+  res.json({ status: 'Declined' });
+});
+
 
 
 

@@ -59,9 +59,11 @@ const createPostJobTableQuery = `
     jobPosition TEXT NOT NULL,
     duration TEXT NOT NULL,
     qualifications TEXT NOT NULL,
+    status TEXT DEFAULT 'Open', 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
-`
+`;
+
 const createMockInterviewsTableQuery = `
   CREATE TABLE IF NOT EXISTS mockInterviews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
