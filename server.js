@@ -440,20 +440,19 @@ app.put('/declineBid/:id', (req, res) => {
   res.json({ status: 'Declined' });
 });
 
+// Route to fetch job status
 app.get('/fetchJobStatus', async (req, res) => {
   try {
-    // Assuming you have a 'postJobs' table with a 'status' column in your database
-    const jobStatusQuery = 'SELECT id, status FROM postJobs';
-    const jobStatusResults = await YourDatabaseClient.query(jobStatusQuery);
+    // Assuming you have a 'postJobs' table with a 'status' column
+    const fetchJobStatusQuery = 'SELECT id, status FROM postJobs';
+    const jobStatusResults = await YourDatabaseClient.query(fetchJobStatusQuery);
 
-    // Send the job status data as a response
-    res.json(jobStatusResults);
+    res.json(jobStatusResults.rows); // Assuming 'rows' contains the array of job status records
   } catch (error) {
-    console.error('Error fetching job status:', error);
+    console.error('Error fetching job status:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 
 
