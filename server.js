@@ -447,7 +447,7 @@ app.get('/fetchJobStatus', async (req, res) => {
     const jobStatusResults = await YourDatabaseClient.query(jobStatusQuery);
 
     // Send the job status data as a response
-    res.json(jobStatusResults.rows);
+    res.json(jobStatusResults);
   } catch (error) {
     console.error('Error fetching job status:', error);
     res.status(500).json({ error: 'Internal Server Error' });
