@@ -442,8 +442,8 @@ app.put('/declineBid/:id', (req, res) => {
 
 app.get('/fetchJobStatus', async (req, res) => {
   try {
-    // Assuming you have a 'jobs' table with a 'status' column in your database
-    const jobStatusQuery = 'SELECT id, status FROM jobs';
+    // Assuming you have a 'postJobs' table with a 'status' column in your database
+    const jobStatusQuery = 'SELECT id, status FROM postJobs';
     const jobStatusResults = await YourDatabaseClient.query(jobStatusQuery);
 
     // Send the job status data as a response
@@ -453,6 +453,7 @@ app.get('/fetchJobStatus', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
