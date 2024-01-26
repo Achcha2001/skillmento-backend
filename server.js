@@ -440,11 +440,10 @@ app.put('/declineBid/:id', (req, res) => {
   res.json({ status: 'Declined' });
 });
 
-// Route to fetch job status for a specific job
+// Route to fetch job status
 app.get('/fetchJobStatus/:id', async (req, res) => {
-  const jobId = req.params.id;
-
   try {
+    const jobId = req.params.id;
     // Assuming you have a 'postJobs' table with a 'status' column
     const fetchJobStatusQuery = 'SELECT id, status FROM postJobs WHERE id = ?';
     const jobStatusResults = await YourDatabaseClient.query(fetchJobStatusQuery, [jobId]);
@@ -455,6 +454,7 @@ app.get('/fetchJobStatus/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
