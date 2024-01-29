@@ -122,10 +122,10 @@ app.post('/freelancers', async (req, res) => {
   const { firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, password } = req.body;
 
   try {
-    // Hash the password before storing it
+   
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Insert freelancer registration data into the "freelancers" table
+    
     const result = await req.db.run(
       'INSERT INTO freelancers (firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, hashedPassword]
@@ -144,15 +144,15 @@ app.post('/freelancers', async (req, res) => {
   }
 });
 
-// Employer registration route
+
 app.post('/employers', async (req, res) => {
   const { companyName, position, email, employerPreferredSubject, password } = req.body;
 
   try {
-    // Hash the password before storing it
+ 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Insert employer registration data into the "employers" table
+   
     const result = await req.db.run(
       'INSERT INTO employers (companyName, position, email, employerPreferredSubject, password) VALUES (?, ?, ?, ?, ?)',
       [companyName, position, email, employerPreferredSubject, hashedPassword]
@@ -359,8 +359,7 @@ app.get('/getLoggedInUserName', (req, res) => {
       }
     });
   } else {
-    // If there's no token, you can still respond with a default value or an error message.
-    // Adjust this part based on your application's requirements.
+    
     res.status(401).json({ message: 'Not logged in' });
   }
 });
@@ -390,7 +389,7 @@ app.post('/contactus', async (req, res) => {
   }
 });
 
-// Add this route to fetch contact messages
+
 app.get('/fetchContacts', async (req, res) => {
   try {
     const db = await req.db;
@@ -449,17 +448,14 @@ app.get('/fetchMockInterviews', async (req, res) => {
 // Update bid status to 'Accepted'
 app.put('/acceptBid/:id', (req, res) => {
   const bidId = req.params.id;
-  // Perform database update or any other necessary logic
-  // Set the status to 'Accepted' in your database
-
+  
   res.json({ status: 'Accepted' });
 });
 
 // Update bid status to 'Declined'
 app.put('/declineBid/:id', (req, res) => {
   const bidId = req.params.id;
-  // Perform database update or any other necessary logic
-  // Set the status to 'Declined' in your database
+ 
 
   res.json({ status: 'Declined' });
 });
