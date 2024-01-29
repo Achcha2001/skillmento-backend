@@ -172,27 +172,42 @@ app.post('/employers', async (req, res) => {
 });
 
 
+
 // Login route for all user types
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
     // Check if the credentials match an intern
-    const intern = await req.db.get('SELECT * FROM interns WHERE email = ? AND password = ?', [email, password]);
+    const intern = await req.db.get('SELECT id, password FROM interns WHERE email = ?', [email]);
 
     if (intern) {
-      // Create a JWT token for authentication
-      const token = jwt.sign({ userId: intern.id, userType: 'intern' }, 'your-secret-key', { expiresIn: '1h' });
-      return res.json({ message: 'Login successful', token, userType: 'intern' });
+      // Compare the entered password with the hashed password from the database
+      const isPasswordValid = await bcrypt.compare(password, intern.password);
+
+      if (isPasswordValid) {
+        // Create a JWT token for authentication
+        const token = jwt.sign({ userId: intern.id, userType: 'intern' }, 'your-secret-key', { expiresIn: '1h' });
+        return res.json({ message: 'Login successful', token, userType: 'intern' });
+      } else {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
     }
 
     // If not an intern, check if the credentials match an employer
-    const employer = await req.db.get('SELECT * FROM employers WHERE email = ? AND password = ?', [email, password]);
+    const employer = await req.db.get('SELECT id, password FROM employers WHERE email = ?', [email]);
 
     if (employer) {
-      // Create a JWT token for authentication
-      const token = jwt.sign({ userId: employer.id, userType: 'employer' }, 'your-secret-key', { expiresIn: '1h' });
-      return res.json({ message: 'Login successful', token, userType: 'employer' });
+      // Compare the entered password with the hashed password from the database
+      const isPasswordValid = await bcrypt.compare(password, employer.password);
+
+      if (isPasswordValid) {
+        // Create a JWT token for authentication
+        const token = jwt.sign({ userId: employer.id, userType: 'employer' }, 'your-secret-key', { expiresIn: '1h' });
+        return res.json({ message: 'Login successful', token, userType: 'employer' });
+      } else {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
     }
 
     // If no match, return Invalid credentials
