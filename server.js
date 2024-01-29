@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const cors = require('cors');
 const {
   dbPromise,
@@ -87,15 +88,20 @@ app.use(async (req, res, next) => {
 
 })();
 
+
+
 // Intern registration route
 app.post('/interns', async (req, res) => {
   const { firstName, lastName, email, university, contact, password } = req.body;
 
   try {
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     // Insert intern registration data into the "interns" table
     const result = await req.db.run(
       'INSERT INTO interns (firstName, lastName, email, university, contact, password) VALUES (?, ?, ?, ?, ?, ?)',
-      [firstName, lastName, email, university, contact, password]
+      [firstName, lastName, email, university, contact, hashedPassword]
     );
 
     if (result && result.lastID) {
@@ -107,7 +113,6 @@ app.post('/interns', async (req, res) => {
     }
   } catch (error) {
     console.error('Error during intern registration:', error);
-    console.error(error.message);
     res.status(500).json({ message: 'Failed to register intern' });
   }
 });
@@ -117,10 +122,13 @@ app.post('/freelancers', async (req, res) => {
   const { firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, password } = req.body;
 
   try {
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     // Insert freelancer registration data into the "freelancers" table
     const result = await req.db.run(
       'INSERT INTO freelancers (firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, password]
+      [firstName, lastName, email, experience, preferredSubject, companyWorked, jobPosition, hashedPassword]
     );
 
     if (result && result.lastID) {
@@ -132,7 +140,6 @@ app.post('/freelancers', async (req, res) => {
     }
   } catch (error) {
     console.error('Error during freelancer registration:', error);
-    console.error(error.message);
     res.status(500).json({ message: 'Failed to register freelancer' });
   }
 });
@@ -142,10 +149,13 @@ app.post('/employers', async (req, res) => {
   const { companyName, position, email, employerPreferredSubject, password } = req.body;
 
   try {
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     // Insert employer registration data into the "employers" table
     const result = await req.db.run(
       'INSERT INTO employers (companyName, position, email, employerPreferredSubject, password) VALUES (?, ?, ?, ?, ?)',
-      [companyName, position, email, employerPreferredSubject, password]
+      [companyName, position, email, employerPreferredSubject, hashedPassword]
     );
 
     if (result && result.lastID) {
@@ -157,11 +167,10 @@ app.post('/employers', async (req, res) => {
     }
   } catch (error) {
     console.error('Error during employer registration:', error);
-    console.error(error.message);
     res.status(500).json({ message: 'Failed to register employer' });
   }
-  
 });
+
 
 // Login route for all user types
 app.post('/login', async (req, res) => {
